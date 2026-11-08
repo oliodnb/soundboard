@@ -1,6 +1,6 @@
-<!-- OLIO - BODY CODE COMPLETO (soundboard + WDC Radio). Incolla tutto al posto del Body Code attuale. -->
+<!-- OLIO BODY CODE (soundboard + WDC Radio): sostituisci tutto il Body Code e salva. -->
 
-<!-- 1) SOUNDBOARD: codice originale della pagina /soundboard, invariato -->
+<!-- 1) SOUNDBOARD: codice originale invariato -->
 <style>
 [data-theme="custom"]{--theme-bg:#000000;--theme-text:#ffffff;--theme-accent:#ffffff}
 body[data-slug="soundboard"] h1.post-title{display:none}
@@ -117,10 +117,10 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
 })();
 </script>
 
-<!-- 2) WDC RADIO: player casuale su /radio. Lista brani: radio-tracks.js sul tuo GitHub -->
+<!-- 2) WDC RADIO: player casuale su /radio -->
 
 <style>
-/* WDC Radio: stili solo dentro .olio-radio; font di sistema ovunque tranne il titolo (Olio Sans) */
+/* WDC Radio: stili dentro .olio-radio; titolo in Olio Sans, resto font di sistema */
 .olio-radio{max-width:64rem;margin:2rem auto;color:inherit;font:inherit}
 .olio-radio *{font-family:system-ui,sans-serif}
 .olio-radio h2{font-size:2rem;letter-spacing:-.04em;margin:.4rem 0;font-family:"Olio Sans",sans-serif;font-weight:400}
@@ -144,7 +144,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
 .olio-queue summary:focus-visible{outline:3px solid #73a89a;outline-offset:4px}
 .olio-studio{position:relative;width:100%;margin:1.5rem 0}
 .olio-desk{display:block;width:100%;height:auto}
-.olio-studio .olio-video{box-sizing:border-box;margin:0;min-height:0;aspect-ratio:auto;position:absolute;left:20.7%;top:10.5%;width:55.3%;height:58.1%;border:0;background:#111}
+.olio-studio .olio-video{margin:0;min-height:0;aspect-ratio:auto;position:absolute;left:28.7%;top:4.3%;width:40.9%;height:43.8%;border:0;background:#111}
 .olio-studio .olio-video>div,.olio-studio .olio-video iframe{min-height:0}
 .olio-studio .olio-video p{font-size:1rem;padding:1rem}
 @media(max-width:740px){
@@ -152,10 +152,14 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
   .olio-studio .olio-video{position:relative;left:auto;top:auto;width:100%;height:230px;margin-top:1rem}
   .olio-desk{height:auto;max-height:none;object-fit:contain}
 }
-.olio-studio picture{display:block;aspect-ratio:750/430}
+.olio-studio picture{display:block;aspect-ratio:1170/600}
 .olio-studio picture .olio-desk{height:100%;object-fit:cover}
 @media(max-width:740px){
   .olio-studio picture{aspect-ratio:480/720}
+}
+@media(min-width:741px) and (max-width:935px){
+  .olio-studio picture{width:100%;height:460px}
+  .olio-studio .olio-video{left:50%;top:20px;width:367px;height:202px;margin-left:-191px}
 }
 @media(min-width:386px) and (max-width:740px){
   .olio-studio{width:100vw;margin-left:calc((100% - 100vw)/2)}
@@ -164,11 +168,11 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
 .olio-note a{color:inherit}
 </style>
 <script src="https://oliodnb.github.io/soundboard/radio-tracks.js"></script>
-<script>/* WDC Radio 1.0 - player casuale per /radio. Nessun account, niente richieste a YouTube prima di Play. */
+<script>/* WDC Radio 1.0 - player casuale per /radio. Niente richieste a YouTube prima di Play. */
 (function () {
   'use strict';
   const SLUG = '/radio';
-  // Coda da radio-tracks.js (GitHub). Se manca o fallisce, errore chiaro in pagina.
+  // Coda da radio-tracks.js; se fallisce, errore chiaro in pagina.
   const TRACKS = window.OLIO_TRACKS || [];
   let cleanup = null;
   const shuffled = items => {
@@ -189,7 +193,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
       host.insertAdjacentHTML('beforeend', `
 <section class="olio-radio" data-olio-radio aria-label="WDC Radio">
   <h2>WDC Radio</h2>
-  <div class="olio-studio"><picture><source media="(max-width:740px)" srcset="https://oliodnb.github.io/soundboard/scrivania-mobile-stretta.jpg"><img class="olio-desk" src="https://oliodnb.github.io/soundboard/scrivania.jpg" width="750" height="430" alt="The WDC Radio desk, with monitor and instruments"></picture><div class="olio-video"><div data-player></div></div></div><p class="olio-note">Might show ads - <a href="https://fmhy.net/privacy">Adblocker</a> recommended</p>
+  <div class="olio-studio"><picture><source media="(max-width:740px)" srcset="https://oliodnb.github.io/soundboard/scrivania-mobile-stretta.jpg"><img class="olio-desk" src="https://oliodnb.github.io/soundboard/scrivania2.jpg" width="1170" height="600" alt="The WDC Radio desk, with monitor and instruments"></picture><div class="olio-video"><div data-player></div></div></div><p class="olio-note">Might show ads - <a href="https://fmhy.net/privacy">Adblocker</a> recommended</p>
   <h3 data-title>The selection is on its way</h3>
   <p data-status role="status" aria-live="polite">Loading...</p>
   <div class="olio-controls"><button type="button" data-back aria-label="Previous track">|&lt;</button><button type="button" data-play aria-label="Play">&gt;</button><button type="button" data-next aria-label="Next track">&gt;|</button><button type="button" data-mix aria-label="Shuffle">♻︎</button></div>
@@ -282,7 +286,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
     on(next,'click',()=>{if(queue.length){history.push(current);load((current+1)%queue.length);}});
     on(back,'click',()=>{if(history.length)load(history.pop());});
     on(mix,'click',()=>{
-      // Keep the current video, shuffle the remaining queue. No repeats within this pass.
+      // Keep the current video, shuffle the remaining queue. No repeats per pass.
       if(!queue.length)return;
       history=[];
       if(ready) {queue=[queue[current],...shuffled(queue.filter((_,i)=>i!==current))];current=0;}
