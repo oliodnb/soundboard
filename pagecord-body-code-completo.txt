@@ -120,7 +120,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
 <!-- 2) WDC RADIO: player casuale su /radio -->
 
 <style>
-/* WDC Radio: stili dentro .olio-radio; titolo in Olio Sans, resto font di sistema */
+/* WDC Radio: stili isolati, font di sistema */
 /* Su /radio nasconde titolo e parola obbligatoria */
 body[data-slug="radio"] h1.post-title{display:none}
 body[data-slug="radio"] .post-body>p{display:none}
@@ -132,7 +132,7 @@ body[data-slug="radio"] .post-body>p{display:none}
 .olio-video>div,.olio-video iframe{width:100%;height:100%;min-height:220px;border:0;display:block}
 .olio-video p{padding:1.5rem;text-align:center}
 .olio-controls{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
-.olio-controls button{font:inherit;padding:.8rem 0;min-height:44px;width:3.4rem;text-align:center;border:1px solid currentColor;border-radius:.4rem;background:transparent;color:inherit;cursor:pointer}
+.olio-controls button{font:inherit;padding:.8rem 0;min-height:44px;width:3.4rem;display:block;text-align:center;border:1px solid currentColor;border-radius:.4rem;background:transparent;color:inherit;cursor:pointer}
 .olio-controls button:disabled{opacity:.4;cursor:not-allowed}
 .olio-controls button:focus-visible,.olio-radio a:focus-visible{outline:3px solid #73a89a;outline-offset:4px}
 .olio-radio ol{padding-left:1.4rem;line-height:1.9;overflow-wrap:anywhere}
