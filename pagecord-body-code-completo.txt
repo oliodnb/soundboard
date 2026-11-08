@@ -121,9 +121,11 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
 
 <style>
 /* WDC Radio: stili dentro .olio-radio; titolo in Olio Sans, resto font di sistema */
+/* Su /radio nasconde titolo e parola obbligatoria */
+body[data-slug="radio"] h1.post-title{display:none}
+body[data-slug="radio"] .post-body>p{display:none}
 .olio-radio{max-width:64rem;margin:2rem auto;color:inherit;font:inherit}
 .olio-radio *{font-family:system-ui,sans-serif}
-.olio-radio h2{font-size:2rem;letter-spacing:-.04em;margin:.4rem 0;font-family:"Olio Sans",sans-serif;font-weight:400}
 .olio-radio h3{font-size:1.1rem;margin:1.4rem 0 .5rem;overflow-wrap:anywhere}
 .olio-note{font-size:.8rem;opacity:.75;line-height:1.7}
 .olio-video{width:100%;min-height:220px;aspect-ratio:16/9;margin:1.5rem 0;background:#171717;border:1px solid #555;color:white;display:grid;place-items:center}
@@ -192,7 +194,6 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
       if (!host) return;
       host.insertAdjacentHTML('beforeend', `
 <section class="olio-radio" data-olio-radio aria-label="WDC Radio">
-  <h2>WDC Radio</h2>
   <div class="olio-studio"><picture><source media="(max-width:740px)" srcset="https://oliodnb.github.io/soundboard/scrivania-mobile-stretta.jpg"><img class="olio-desk" src="https://oliodnb.github.io/soundboard/scrivania2.jpg" width="1170" height="600" alt="The WDC Radio desk, with monitor and instruments"></picture><div class="olio-video"><div data-player></div></div></div><p class="olio-note">Might show ads - <a href="https://fmhy.net/privacy">Adblocker</a> recommended</p>
   <h3 data-title>The selection is on its way</h3>
   <p data-status role="status" aria-live="polite">Loading...</p>
