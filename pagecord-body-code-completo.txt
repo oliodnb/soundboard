@@ -144,7 +144,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
 .olio-queue summary:focus-visible{outline:3px solid #73a89a;outline-offset:4px}
 .olio-studio{position:relative;width:100%;margin:1.5rem 0}
 .olio-desk{display:block;width:100%;height:auto}
-.olio-studio .olio-video{margin:0;min-height:0;aspect-ratio:auto;position:absolute;left:28.7%;top:4.3%;width:40.9%;height:43.8%;border:0;background:#111}
+.olio-studio .olio-video{margin:0;min-height:0;aspect-ratio:auto;position:absolute;left:29.7%;top:4.5%;width:40.0%;height:43.8%;border:0;background:#111}
 .olio-studio .olio-video>div,.olio-studio .olio-video iframe{min-height:0}
 .olio-studio .olio-video p{font-size:1rem;padding:1rem}
 @media(max-width:740px){
@@ -168,11 +168,11 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
 .olio-note a{color:inherit}
 </style>
 <script src="https://oliodnb.github.io/soundboard/radio-tracks.js"></script>
-<script>/* WDC Radio 1.0 - player casuale per /radio. Niente richieste a YouTube prima di Play. */
+<script>/* WDC Radio 1.0 - player casuale per /radio */
 (function () {
   'use strict';
   const SLUG = '/radio';
-  // Coda da radio-tracks.js; se fallisce, errore chiaro in pagina.
+  // Coda da radio-tracks.js
   const TRACKS = window.OLIO_TRACKS || [];
   let cleanup = null;
   const shuffled = items => {
@@ -219,7 +219,8 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
     const mix=root.querySelector('[data-mix]');
     const listeners=[];
     const on=(el,ev,fn)=>{el.addEventListener(ev,fn);listeners.push(()=>el.removeEventListener(ev,fn));};
-    const message=text=>{status.textContent=text;};
+    const message=text=>{status.textContent=text;}
+    const byId=t=>player.loadVideoById(t.start!=null||t.end!=null?{videoId:t.id,startSeconds:t.start||0,endSeconds:t.end}:t.id);;
     function render(){
       list.replaceChildren();
       root.querySelector("[data-count]").textContent="Queue ("+queue.length+")";
@@ -237,7 +238,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
     function setPlay(icon,label){play.textContent=icon;play.setAttribute('aria-label',label);}
     function load(index){
       current=index;ended=false;render();
-      if(ready){const t=queue[current];player.loadVideoById(t.start!=null||t.end!=null?{videoId:t.id,startSeconds:t.start||0,endSeconds:t.end}:t.id);message('Loading the video...');}
+      if(ready){byId(queue[current]);message('Loading the video...');}
     }
     function advance(){
       if(current+1<queue.length){history.push(current);load(current+1);}
@@ -270,7 +271,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
           host:'https://www.youtube-nocookie.com',
           playerVars:{playsinline:1,controls:1,origin:location.origin,...(queue[current].start!=null?{start:queue[current].start}:{}),...(queue[current].end!=null?{end:queue[current].end}:{})},
           events:{
-            onReady:()=>{if(dead)return;ready=true;loading=false;message('YouTube ready. Press Play if the video does not start.');player.playVideo();},
+            onReady:()=>{if(dead)return;ready=true;loading=false;const t=queue[current];if(player.getVideoData().video_id!==t.id)byId(t);else player.playVideo();message('Playing on YouTube');},
             onStateChange:e=>{
               if(dead)return;
               if(e.data===1){setPlay('||','Pause');message('Playing on YouTube');}
@@ -286,7 +287,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
     on(next,'click',()=>{if(queue.length){history.push(current);load((current+1)%queue.length);}});
     on(back,'click',()=>{if(history.length)load(history.pop());});
     on(mix,'click',()=>{
-      // Keep the current video, shuffle the remaining queue. No repeats per pass.
+      // Shuffle senza ripetizioni; il brano in corso resta.
       if(!queue.length)return;
       history=[];
       if(ready) {queue=[queue[current],...shuffled(queue.filter((_,i)=>i!==current))];current=0;}
