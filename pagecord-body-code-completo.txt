@@ -1,6 +1,5 @@
-<!-- OLIO BODY CODE (soundboard + WDC Radio): sostituisci tutto il Body Code e salva. -->
-
-<!-- 1) SOUNDBOARD: codice originale invariato -->
+<!-- Body Code completo: sostituisci tutto e salva. -->
+<!-- 1) SOUNDBOARD (invariato) -->
 <style>
 [data-theme="custom"]{--theme-bg:#000000;--theme-text:#ffffff;--theme-accent:#ffffff}
 body[data-slug="soundboard"] h1.post-title{display:none}
@@ -15,7 +14,8 @@ body,body *{font-family:"Olio Sans",sans-serif}.sb{max-width:26rem;margin:1.5rem
 .sb-menu p{margin:0 0 .8rem;font-size:1.3rem;text-align:center}
 .sb-menu button{margin-top:.5rem}
 body[data-slug="soundboard"] .avatar{background:url("https://oliodnb.github.io/soundboard/avatar-soundboard.jpg") center/cover no-repeat}
-body[data-slug="soundboard"] .avatar img{opacity:0}  
+body[data-slug="soundboard"] .avatar img{opacity:0}
+a[href="/soundboard"],a[href="/radio"]{filter:grayscale(1)}
 </style>
 <script>
 (function () {
@@ -117,7 +117,7 @@ body[data-slug="soundboard"] .avatar img{opacity:0}
 })();
 </script>
 
-<!-- 2) WDC RADIO: player casuale su /radio -->
+<!-- 2) WDC RADIO -->
 
 <style>
 /* WDC Radio: stili isolati, font di sistema */
@@ -127,7 +127,7 @@ body[data-slug="radio"] .post-body>p{display:none}
 .olio-radio{max-width:64rem;margin:2rem auto;color:inherit;font:inherit}
 .olio-radio *{font-family:system-ui,sans-serif}
 .olio-radio h3{font-size:1.1rem;margin:1.4rem 0 .5rem;overflow-wrap:anywhere}
-.olio-note{font-size:.8rem;opacity:.75;line-height:1.7}
+.olio-note{font-size:.8rem;opacity:.75;line-height:1.7;margin-top:1.2rem}
 .olio-video{width:100%;min-height:220px;aspect-ratio:16/9;margin:1.5rem 0;background:#171717;border:1px solid #555;color:white;display:grid;place-items:center}
 .olio-video>div,.olio-video iframe{width:100%;height:100%;min-height:220px;border:0;display:block}
 .olio-video p{padding:1.5rem;text-align:center}
@@ -165,25 +165,30 @@ body[data-slug="radio"] .post-body>p{display:none}
 }
 @media(min-width:386px) and (max-width:740px){
   .olio-studio{width:100vw;margin-left:calc((100% - 100vw)/2)}
-  .olio-studio .olio-video{position:absolute;left:9.4%;top:6.3%;width:86.4%;height:34.7%;margin:0}
+  .olio-studio .olio-video{position:absolute;left:9.4%;top:7.5%;width:86.4%;height:34.7%;margin:0}
 }
 .olio-note a{color:inherit}
 </style>
 <script src="https://oliodnb.github.io/soundboard/radio-tracks.js"></script>
-<script>/* WDC Radio 1.0 - player casuale per /radio */
+<script>/* WDC Radio 1.2 */
 (function () {
   'use strict';
   const SLUG = '/radio';
-  // Coda da radio-tracks.js
   const TRACKS = window.OLIO_TRACKS || [];
   let cleanup = null;
-  const shuffled = items => {
-    const result = items.slice();
-    for (let i=result.length-1;i>0;i--) {
-      const j=Math.floor(Math.random()*(i+1));
-      [result[i],result[j]]=[result[j],result[i]];
+  const artist=t=>(t.title).split(' - ')[0].trim().toLowerCase();
+  // Shuffle: mai lo stesso artista di fila quando possibile.
+  const shuffled=(items,prev)=>{
+    for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]];}
+    const g={};items.forEach(t=>{(g[artist(t)]=g[artist(t)]||[]).push(t)});
+    const gs=Object.entries(g),out=[];let last=prev||'';
+    while(gs.length){
+      gs.sort((a,b)=>b[1].length-a[1].length);
+      let k=gs[0][0]===last&&gs[1]?1:0;
+      last=gs[k][0];out.push(gs[k][1].pop());
+      if(!gs[k][1].length)gs.splice(k,1);
     }
-    return result;
+    return out;
   };
   function init() {
     if (cleanup) {cleanup();cleanup=null;}
@@ -194,13 +199,13 @@ body[data-slug="radio"] .post-body>p{display:none}
       if (!host) return;
       host.insertAdjacentHTML('beforeend', `
 <section class="olio-radio" data-olio-radio aria-label="WDC Radio">
-  <div class="olio-studio"><picture><source media="(max-width:740px)" srcset="https://oliodnb.github.io/soundboard/scrivania-mobile-stretta.jpg"><img class="olio-desk" src="https://oliodnb.github.io/soundboard/scrivania2.jpg" width="1170" height="600" alt="The WDC Radio desk, with monitor and instruments"></picture><div class="olio-video"><div data-player></div></div></div><p class="olio-note">Might show ads - <a href="https://fmhy.net/privacy">Adblocker</a> recommended</p>
-  <h3 data-title>The selection is on its way</h3>
-  <p data-status role="status" aria-live="polite">Loading...</p>
+  <div class="olio-studio"><picture><source media="(max-width:740px)" srcset="https://oliodnb.github.io/soundboard/scrivania-mobile-stretta.jpg"><img class="olio-desk" src="https://oliodnb.github.io/soundboard/scrivania2.jpg" width="1170" height="600" alt="The WDC Radio desk"></picture><div class="olio-video"><div data-player></div></div></div><p class="olio-note">Might show ads - <a href="https://fmhy.net/privacy">Adblocker</a> recommended</p>
+  <h3 data-title>WDC Radio</h3>
+  <p data-status aria-live="polite"></p>
   <div class="olio-controls"><button type="button" data-back aria-label="Previous track">|&lt;</button><button type="button" data-play aria-label="Play">&gt;</button><button type="button" data-next aria-label="Next track">&gt;|</button><button type="button" data-mix aria-label="Shuffle">♻︎</button></div>
-  <details class="olio-queue"><summary data-count>Queue</summary><ol data-list aria-label="Tracks in the queue"></ol></details>
-  <footer class="olio-share" aria-label="Share WDC Radio">
-    <a href="https://olio.pagecord.com/radio" aria-label="Open WDC Radio"><img class="olio-qr" src="https://oliodnb.github.io/soundboard/qr-radio.png" width="296" height="296" alt="QR code for https://olio.pagecord.com/radio"></a>
+  <details class="olio-queue"><summary data-count>Queue</summary><ol data-list aria-label="Queue"></ol></details>
+  <footer class="olio-share">
+    <a href="https://olio.pagecord.com/radio"><img class="olio-qr" src="https://oliodnb.github.io/soundboard/qr-radio.png" width="296" height="296" alt="QR code for olio.pagecord.com/radio"></a>
     <p><a href="https://olio.pagecord.com/radio">olio.pagecord.com/radio</a></p>
   </footer>
 </section>
@@ -214,6 +219,7 @@ body[data-slug="radio"] .post-body>p{display:none}
     const title=root.querySelector('[data-title]');
     const status=root.querySelector('[data-status]');
     const list=root.querySelector('[data-list]');
+    const count=root.querySelector('[data-count]');
     const back=root.querySelector('[data-back]');
     const play=root.querySelector('[data-play]');
     const next=root.querySelector('[data-next]');
@@ -221,15 +227,16 @@ body[data-slug="radio"] .post-body>p{display:none}
     const listeners=[];
     const on=(el,ev,fn)=>{el.addEventListener(ev,fn);listeners.push(()=>el.removeEventListener(ev,fn));};
     const message=text=>{status.textContent=text;}
-    const byId=t=>player.loadVideoById(t.start!=null||t.end!=null?{videoId:t.id,startSeconds:t.start||0,endSeconds:t.end}:t.id);;
+    const byId=t=>player.loadVideoById(t.start!=null||t.end!=null?{videoId:t.id,startSeconds:t.start||0,endSeconds:t.end}:t.id);
     function render(){
       list.replaceChildren();
-      root.querySelector("[data-count]").textContent="Queue ("+queue.length+")";
+      count.textContent="Queue ("+queue.length+")";
       queue.forEach((track,i)=>{
         const li=document.createElement('li');
         const a=document.createElement('a');
         a.href='https://www.youtube.com/watch?v='+track.id;
-        a.target='_blank';a.rel='noopener';a.textContent=track.title;
+        a.textContent=track.title;
+        a.addEventListener('click',e=>{e.preventDefault();if(i===current)return;history.push(current);load(i);if(!ready)play.click();});
         li.append(a);if(i===current) li.setAttribute('aria-current','true');
         list.append(li);
       });
@@ -239,11 +246,11 @@ body[data-slug="radio"] .post-body>p{display:none}
     function setPlay(icon,label){play.textContent=icon;play.setAttribute('aria-label',label);}
     function load(index){
       current=index;ended=false;render();
-      if(ready){byId(queue[current]);message('Loading the video...');}
+      if(ready){byId(queue[current]);message('Loading...');}
     }
     function advance(){
       if(current+1<queue.length){history.push(current);load(current+1);}
-      else {ended=true;message('End of the selection. Press Play to listen again.');setPlay('>','Restart');}
+      else {ended=true;message('End of the selection.');setPlay('>','Restart');}
     }
     async function api(){
       if(window.YT && window.YT.Player) return;
@@ -264,39 +271,38 @@ body[data-slug="radio"] .post-body>p{display:none}
         else player.playVideo();
         return;
       }
-      loading=true;message('Connecting to YouTube...');
+      loading=true;message('Connecting...');
       try {
         await api(); if(dead)return;
         player=new window.YT.Player(root.querySelector('[data-player]'),{
           width:'100%',height:'250',videoId:queue[current].id,
           host:'https://www.youtube-nocookie.com',
-          playerVars:{playsinline:1,controls:1,origin:location.origin,...(queue[current].start!=null?{start:queue[current].start}:{}),...(queue[current].end!=null?{end:queue[current].end}:{})},
+          playerVars:{playsinline:1,origin:location.origin,...(queue[current].start!=null?{start:queue[current].start}:{}),...(queue[current].end!=null?{end:queue[current].end}:{})},
           events:{
-            onReady:()=>{if(dead)return;ready=true;loading=false;const t=queue[current];if(player.getVideoData().video_id!==t.id)byId(t);else player.playVideo();message('Playing on YouTube');},
+            onReady:()=>{if(dead)return;ready=true;loading=false;const t=queue[current];if(player.getVideoData().video_id!==t.id)byId(t);else player.playVideo();message('');},
             onStateChange:e=>{
               if(dead)return;
-              if(e.data===1){setPlay('||','Pause');message('Playing on YouTube');}
+              if(e.data===1){setPlay('||','Pause');message('');}
               if(e.data===2){setPlay('>','Play');message('Paused');}
               if(e.data===0){setPlay('>','Play');advance();}
             },
-            onAutoplayBlocked:()=>{setPlay('>','Play');message('Tap Play in the YouTube frame to start.');},
-            onError:e=>{loading=false;setPlay('>','Play');message('Video not available in the player (code '+e.data+'). Open it on YouTube or press Next.');}
+            onAutoplayBlocked:()=>{setPlay('>','Play');message('Tap the video to start.');},
+            onError:e=>{loading=false;setPlay('>','Play');message('Not available (code '+e.data+'). Press Next.');}
           }
         });
-      } catch(e){loading=false;setPlay('>','Play');message('Could not load YouTube. Try again or use the video link.');}
+      } catch{loading=false;setPlay('>','Play');message('Could not load YouTube.');}
     });
     on(next,'click',()=>{if(queue.length){history.push(current);load((current+1)%queue.length);}});
     on(back,'click',()=>{if(history.length)load(history.pop());});
     on(mix,'click',()=>{
-      // Shuffle senza ripetizioni; il brano in corso resta.
       if(!queue.length)return;
       history=[];
-      if(ready) {queue=[queue[current],...shuffled(queue.filter((_,i)=>i!==current))];current=0;}
+      if(ready) {queue=[queue[current],...shuffled(queue.filter((_,i)=>i!==current),artist(queue[current]))];current=0;}
       else {queue=shuffled(queue);current=0;}
-      render();message('Order shuffled. No repeats until the queue ends.');
+      render();message('Order shuffled.');
     });
     render();
-    message(queue.length?'':'Could not load the track list. Check your connection and reload.');
+    message(queue.length?'':'Could not load the track list.');
     cleanup=()=>{dead=true;listeners.forEach(fn=>fn());if(player&&player.destroy){player.destroy();const mount=document.createElement('div');mount.setAttribute('data-player','');root.querySelector('.olio-video').replaceChildren(mount);}};
   }
   document.addEventListener('turbo:load',init);
