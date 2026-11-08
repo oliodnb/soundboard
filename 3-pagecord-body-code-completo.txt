@@ -1,0 +1,299 @@
+<!-- OLIO - BODY CODE COMPLETO (soundboard + WDC Radio). Incolla tutto al posto del Body Code attuale. -->
+
+<!-- 1) SOUNDBOARD: codice originale della pagina /soundboard, invariato -->
+<style>
+[data-theme="custom"]{--theme-bg:#000000;--theme-text:#ffffff;--theme-accent:#ffffff}
+body[data-slug="soundboard"] h1.post-title{display:none}
+body[data-slug="soundboard"] .post-body h2{display:none}
+@font-face{font-family:"Olio Sans";src:url("https://oliodnb.github.io/soundboard/OlioSans.woff2") format("woff2");font-display:swap}
+html{font-size:120%}
+body,body *{font-family:"Olio Sans",sans-serif}.sb{max-width:26rem;margin:1.5rem auto;display:flex;flex-direction:column;gap:.6rem}
+.sb button,.sb-menu button{width:100%;padding:1.1rem;font:inherit;font-size:1.2rem;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--theme-text);background:color-mix(in srgb,var(--theme-text) 12%,var(--theme-bg));border:1px solid color-mix(in srgb,var(--theme-text) 25%,var(--theme-bg));border-radius:.75rem;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.sb button:active,.sb-menu button:active{background:var(--theme-accent);color:var(--theme-bg)}
+.sb-menu{width:min(90vw,22rem);padding:1rem;color:var(--theme-text);background:var(--theme-bg);border:1px solid color-mix(in srgb,var(--theme-text) 25%,var(--theme-bg));border-radius:1rem}
+.sb-menu::backdrop{background:rgba(0,0,0,.5)}
+.sb-menu p{margin:0 0 .8rem;font-size:1.3rem;text-align:center}
+.sb-menu button{margin-top:.5rem}
+body[data-slug="soundboard"] .avatar{background:url("https://oliodnb.github.io/soundboard/avatar-soundboard.jpg") center/cover no-repeat}
+body[data-slug="soundboard"] .avatar img{opacity:0}  
+</style>
+<script>
+(function () {
+  // Only run on the page whose address ends in /soundboard
+  if (location.pathname.replace(/\/$/, "") !== "/soundboard") return;
+
+  // EDIT THIS LIST: ["Button label", "link to the .mp3 file"]
+  var sounds = [
+    ["Ci si sente meglio",  "https://oliodnb.github.io/soundboard/meglio.mp3"],
+    ["Inutile", "https://oliodnb.github.io/soundboard/inutile.mp3"],
+    ["Braccio", "https://oliodnb.github.io/soundboard/braccio.mp3"],
+    ["Inglesi",  "https://oliodnb.github.io/soundboard/inglesi.mp3"],
+    ["Azienda",  "https://oliodnb.github.io/soundboard/azienda.mp3"],
+    ["Bru.Co",  "https://oliodnb.github.io/soundboard/bruco.mp3"],
+    ["Lei",  "https://oliodnb.github.io/soundboard/lei.mp3"],
+    ["Membri",  "https://oliodnb.github.io/soundboard/membri.mp3"],
+    ["Marrone",  "https://oliodnb.github.io/soundboard/marrone.mp3"],
+    ["Saluto",  "https://oliodnb.github.io/soundboard/saluto.mp3"],
+    ["Ragazzo",  "https://oliodnb.github.io/soundboard/ragazzo.mp3"],
+    ["Raggi solari",  "https://oliodnb.github.io/soundboard/salubri.mp3"],
+  ];
+
+  var host = document.querySelector(".post-body") || document.querySelector("main");
+  if (!host || host.querySelector(".sb")) return;
+  document.body.classList.add("sb-page");
+
+  // Long-press menu: Download / Share / Copy link
+  var menu = document.createElement("dialog");
+  menu.className = "sb-menu";
+  menu.innerHTML = '<p></p><button data-a="save">Download</button><button data-a="share">Share</button><button data-a="copy">Copy link</button><button data-a="close">Close</button>';
+  var chosen;
+
+  function getFile(s) {
+    return fetch(s[1]).then(function (r) { return r.blob(); }).then(function (b) {
+      return new File([b], s[0] + ".mp3", { type: "audio/mpeg" });
+    });
+  }
+  function shareLink(s) {
+    if (navigator.share) navigator.share({ title: s[0], url: s[1] });
+    else navigator.clipboard.writeText(s[1]);
+  }
+
+  menu.onclick = function (e) {
+    var a = e.target.getAttribute("data-a");
+    if (!a && e.target !== menu) return;
+    var s = chosen;
+    if (a === "save") {
+      getFile(s).then(function (f) {
+        var l = document.createElement("a");
+        l.href = URL.createObjectURL(f);
+        l.download = f.name;
+        l.click();
+      }).catch(function () { window.open(s[1], "_blank"); });
+    } else if (a === "share") {
+      getFile(s).then(function (f) {
+        if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] });
+        else shareLink(s);
+      }).catch(function () { shareLink(s); });
+    } else if (a === "copy") {
+      navigator.clipboard.writeText(s[1]);
+    }
+    menu.close();
+  };
+
+  var box = document.createElement("div");
+  box.className = "sb";
+  var current, timer, held;
+
+  sounds.forEach(function (s) {
+    var audio = new Audio(s[1]);
+    var b = document.createElement("button");
+    b.textContent = s[0];
+
+    b.onclick = function () {
+      if (held) { held = false; return; }   // this click was the end of a long press
+      if (current) current.pause();
+      audio.currentTime = 0;
+      audio.play();
+      current = audio;
+    };
+
+    b.onpointerdown = function () {
+      held = false;
+      timer = setTimeout(function () {
+        held = true;
+        chosen = s;
+        menu.querySelector("p").textContent = s[0];
+        menu.showModal();
+      }, 500);
+    };
+    b.onpointerup = b.onpointerleave = b.onpointercancel = function () { clearTimeout(timer); };
+    b.oncontextmenu = function (e) { e.preventDefault(); };
+
+    box.appendChild(b);
+  });
+
+  host.appendChild(box);
+  host.appendChild(menu);
+})();
+</script>
+
+<!-- 2) WDC RADIO: player casuale su /radio. Lista brani: radio-tracks.js sul tuo GitHub -->
+
+<style>
+/* WDC Radio: stili solo dentro .olio-radio; font di sistema ovunque tranne il titolo (Olio Sans) */
+.olio-radio{max-width:64rem;margin:2rem auto;color:inherit;font:inherit}
+.olio-radio *{font-family:system-ui,sans-serif}
+.olio-radio h2{font-size:2rem;letter-spacing:-.04em;margin:.4rem 0;font-family:"Olio Sans",sans-serif;font-weight:400}
+.olio-radio h3{font-size:1.1rem;margin:1.4rem 0 .5rem;overflow-wrap:anywhere}
+.olio-note{font-size:.8rem;opacity:.75;line-height:1.7}
+.olio-video{width:100%;min-height:220px;aspect-ratio:16/9;margin:1.5rem 0;background:#171717;border:1px solid #555;color:white;display:grid;place-items:center}
+.olio-video>div,.olio-video iframe{width:100%;height:100%;min-height:220px;border:0;display:block}
+.olio-video p{padding:1.5rem;text-align:center}
+.olio-controls{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+.olio-controls button{font:inherit;padding:.8rem 1rem;min-height:44px;border:1px solid currentColor;border-radius:.4rem;background:transparent;color:inherit;cursor:pointer}
+.olio-controls button:disabled{opacity:.4;cursor:not-allowed}
+.olio-controls button:focus-visible,.olio-radio a:focus-visible{outline:3px solid #73a89a;outline-offset:4px}
+.olio-radio ol{padding-left:1.4rem;line-height:1.9;overflow-wrap:anywhere}
+.olio-radio [aria-current=true]{font-weight:600}
+.olio-share{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid #555;text-align:center}
+.olio-share p{overflow-wrap:anywhere}
+.olio-qr{display:block;width:259px;max-width:100%;height:auto;aspect-ratio:1;margin:1.25rem auto;background:#fff;image-rendering:pixelated}
+.olio-share a{color:inherit;text-underline-offset:.2em}
+.olio-queue{margin:1.5rem 0}
+.olio-queue summary{cursor:pointer;min-height:44px;display:list-item;padding:.5rem 0}
+.olio-queue summary:focus-visible{outline:3px solid #73a89a;outline-offset:4px}
+.olio-studio{position:relative;width:100%;margin:1.5rem 0}
+.olio-desk{display:block;width:100%;height:auto}
+.olio-studio .olio-video{box-sizing:border-box;margin:0;min-height:0;aspect-ratio:auto;position:absolute;left:20.7%;top:10.5%;width:55.3%;height:58.1%;border:0;background:#111}
+.olio-studio .olio-video>div,.olio-studio .olio-video iframe{min-height:0}
+.olio-studio .olio-video p{font-size:1rem;padding:1rem}
+@media(max-width:740px){
+  .olio-studio{margin-bottom:0}
+  .olio-studio .olio-video{position:relative;left:auto;top:auto;width:100%;height:230px;margin-top:1rem}
+  .olio-desk{height:auto;max-height:none;object-fit:contain}
+}
+.olio-studio picture{display:block;aspect-ratio:750/430}
+.olio-studio picture .olio-desk{height:100%;object-fit:cover}
+@media(max-width:740px){
+  .olio-studio picture{aspect-ratio:480/720}
+}
+@media(min-width:386px) and (max-width:740px){
+  .olio-studio{width:100vw;margin-left:calc((100% - 100vw)/2)}
+  .olio-studio .olio-video{position:absolute;left:9.4%;top:6.3%;width:86.4%;height:34.7%;margin:0}
+}
+.olio-note a{color:inherit}
+</style>
+<script src="https://oliodnb.github.io/soundboard/radio-tracks.js"></script>
+<script>/* WDC Radio 1.0 - player casuale per /radio. Nessun account, niente richieste a YouTube prima di Play. */
+(function () {
+  'use strict';
+  const SLUG = '/radio';
+  // Coda da radio-tracks.js (GitHub). Se manca o fallisce, errore chiaro in pagina.
+  const TRACKS = window.OLIO_TRACKS || [];
+  let cleanup = null;
+  const shuffled = items => {
+    const result = items.slice();
+    for (let i=result.length-1;i>0;i--) {
+      const j=Math.floor(Math.random()*(i+1));
+      [result[i],result[j]]=[result[j],result[i]];
+    }
+    return result;
+  };
+  function init() {
+    if (cleanup) {cleanup();cleanup=null;}
+    if (location.pathname.replace(/\/$/,'') !== SLUG) return;
+    let root=document.querySelector('[data-olio-radio]');
+    if (!root) {
+      const host=document.querySelector('article .post-body');
+      if (!host) return;
+      host.insertAdjacentHTML('beforeend', `
+<section class="olio-radio" data-olio-radio aria-label="WDC Radio">
+  <h2>WDC Radio</h2>
+  <div class="olio-studio"><picture><source media="(max-width:740px)" srcset="https://oliodnb.github.io/soundboard/scrivania-mobile-stretta.jpg"><img class="olio-desk" src="https://oliodnb.github.io/soundboard/scrivania.jpg" width="750" height="430" alt="The WDC Radio desk, with monitor and instruments"></picture><div class="olio-video"><div data-player></div></div></div><p class="olio-note">Might show ads - <a href="https://fmhy.net/privacy">Adblocker</a> recommended</p>
+  <h3 data-title>The selection is on its way</h3>
+  <p data-status role="status" aria-live="polite">Loading...</p>
+  <div class="olio-controls"><button type="button" data-back aria-label="Previous track">|&lt;</button><button type="button" data-play aria-label="Play">&gt;</button><button type="button" data-next aria-label="Next track">&gt;|</button><button type="button" data-mix aria-label="Shuffle">♻︎</button></div>
+  <details class="olio-queue"><summary data-count>Queue</summary><ol data-list aria-label="Tracks in the queue"></ol></details>
+  <footer class="olio-share" aria-label="Share WDC Radio">
+    <a href="https://olio.pagecord.com/radio" aria-label="Open WDC Radio"><img class="olio-qr" src="https://oliodnb.github.io/soundboard/qr-radio.png" width="296" height="296" alt="QR code for https://olio.pagecord.com/radio"></a>
+    <p><a href="https://olio.pagecord.com/radio">olio.pagecord.com/radio</a></p>
+  </footer>
+</section>
+`);
+      root=host.querySelector('[data-olio-radio]');
+    }
+    let player=null, ready=false, loading=false, dead=false, current=0, ended=false;
+    let history=[];
+    const tracks=TRACKS.filter(t=>/^[A-Za-z0-9_-]{11}$/.test(t.id));
+    let queue=shuffled(tracks);
+    const title=root.querySelector('[data-title]');
+    const status=root.querySelector('[data-status]');
+    const list=root.querySelector('[data-list]');
+    const back=root.querySelector('[data-back]');
+    const play=root.querySelector('[data-play]');
+    const next=root.querySelector('[data-next]');
+    const mix=root.querySelector('[data-mix]');
+    const listeners=[];
+    const on=(el,ev,fn)=>{el.addEventListener(ev,fn);listeners.push(()=>el.removeEventListener(ev,fn));};
+    const message=text=>{status.textContent=text;};
+    function render(){
+      list.replaceChildren();
+      root.querySelector("[data-count]").textContent="Queue ("+queue.length+")";
+      queue.forEach((track,i)=>{
+        const li=document.createElement('li');
+        const a=document.createElement('a');
+        a.href='https://www.youtube.com/watch?v='+track.id;
+        a.target='_blank';a.rel='noopener';a.textContent=track.title;
+        li.append(a);if(i===current) li.setAttribute('aria-current','true');
+        list.append(li);
+      });
+      title.textContent=queue.length ? queue[current].title : 'Track list unavailable';
+      play.disabled=!queue.length; next.disabled=queue.length<2; mix.disabled=queue.length<2; back.disabled=!history.length;
+    }
+    function setPlay(icon,label){play.textContent=icon;play.setAttribute('aria-label',label);}
+    function load(index){
+      current=index;ended=false;render();
+      if(ready){const t=queue[current];player.loadVideoById(t.start!=null||t.end!=null?{videoId:t.id,startSeconds:t.start||0,endSeconds:t.end}:t.id);message('Loading the video...');}
+    }
+    function advance(){
+      if(current+1<queue.length){history.push(current);load(current+1);}
+      else {ended=true;message('End of the selection. Press Play to listen again.');setPlay('>','Restart');}
+    }
+    async function api(){
+      if(window.YT && window.YT.Player) return;
+      if(!window.olioYouTubeReady) window.olioYouTubeReady=new Promise((resolve,reject)=>{
+        const previous=window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady=()=>{if(typeof previous==='function')previous();resolve();};
+        const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';
+        s.onerror=()=>{window.olioYouTubeReady=null;reject(new Error('YouTube non raggiungibile'));};
+        document.head.append(s);
+      });
+      await window.olioYouTubeReady;
+    }
+    on(play,'click',async()=>{
+      if(!queue.length || loading)return;
+      if(ready){
+        if(player.getPlayerState()===1)player.pauseVideo();
+        else if(ended){history=[];load(0);}
+        else player.playVideo();
+        return;
+      }
+      loading=true;message('Connecting to YouTube...');
+      try {
+        await api(); if(dead)return;
+        player=new window.YT.Player(root.querySelector('[data-player]'),{
+          width:'100%',height:'250',videoId:queue[current].id,
+          host:'https://www.youtube-nocookie.com',
+          playerVars:{playsinline:1,controls:1,origin:location.origin,...(queue[current].start!=null?{start:queue[current].start}:{}),...(queue[current].end!=null?{end:queue[current].end}:{})},
+          events:{
+            onReady:()=>{if(dead)return;ready=true;loading=false;message('YouTube ready. Press Play if the video does not start.');player.playVideo();},
+            onStateChange:e=>{
+              if(dead)return;
+              if(e.data===1){setPlay('||','Pause');message('Playing on YouTube');}
+              if(e.data===2){setPlay('>','Play');message('Paused');}
+              if(e.data===0){setPlay('>','Play');advance();}
+            },
+            onAutoplayBlocked:()=>{setPlay('>','Play');message('Tap Play in the YouTube frame to start.');},
+            onError:e=>{loading=false;setPlay('>','Play');message('Video not available in the player (code '+e.data+'). Open it on YouTube or press Next.');}
+          }
+        });
+      } catch(e){loading=false;setPlay('>','Play');message('Could not load YouTube. Try again or use the video link.');}
+    });
+    on(next,'click',()=>{if(queue.length){history.push(current);load((current+1)%queue.length);}});
+    on(back,'click',()=>{if(history.length)load(history.pop());});
+    on(mix,'click',()=>{
+      // Keep the current video, shuffle the remaining queue. No repeats within this pass.
+      if(!queue.length)return;
+      history=[];
+      if(ready) {queue=[queue[current],...shuffled(queue.filter((_,i)=>i!==current))];current=0;}
+      else {queue=shuffled(queue);current=0;}
+      render();message('Order shuffled. No repeats until the queue ends.');
+    });
+    render();
+    message(queue.length?'':'Could not load the track list. Check your connection and reload.');
+    cleanup=()=>{dead=true;listeners.forEach(fn=>fn());if(player&&player.destroy){player.destroy();const mount=document.createElement('div');mount.setAttribute('data-player','');root.querySelector('.olio-video').replaceChildren(mount);}};
+  }
+  document.addEventListener('turbo:load',init);
+  document.addEventListener('turbo:before-cache',()=>{if(cleanup){cleanup();cleanup=null;}});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();</script>
